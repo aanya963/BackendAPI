@@ -1,16 +1,17 @@
 from fastapi import FastAPI # type: ignore
 from pydantic import BaseModel # type: ignore
+import os 
+from groq import Groq
+from dotenv import load_dotenv
 
+load_dotenv()
 app = FastAPI()
 
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 # data model using pydantic. : Validates input automatically, Prevents wrong data, Very common in backend systems
 class analyzeRequest(BaseModel):
     query: str
     logs: list[str]
-
-@app.get("/")
-def read_root():
-    return {"message": "Python service is running"}
 
 
 @app.post("/analyze")
@@ -33,15 +34,23 @@ def analyze_data(req : analyzeRequest):
 
     # For now, simulate reasoning (we'll plug real LLM next)
 
-    if "1200" in logs_text or "slow" in logs_text.lower():
-        analysis = "The system appears slow due to high latency in requests."
-    elif "timeout" in logs_text.lower():
-        analysis = "Timeout errors suggest backend or database delays."
-    else : 
-        analysis = "No obvious issue detected from logs."
-    
+    response = client.chat.completions.create(
+        model="llama-3.1-8b-instant",
+        messages=[
+            {
+                "role": "system",
+                "content": "You are a debugging assistant."
+            },
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+    answer = response.choices[0].message.content
+
     return {
-        "analysis": analysis,
+        "analysis": answer,
         "logs_analyzed": len(req.logs)
     }
 
