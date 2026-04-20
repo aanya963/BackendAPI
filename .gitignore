@@ -1,0 +1,12 @@
+# .NET build output
+bin/
+obj/
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Environment secrets
+.env
+appsettings.*.json  # optional — only if it contains secrets
