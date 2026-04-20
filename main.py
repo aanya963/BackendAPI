@@ -15,8 +15,33 @@ def read_root():
 
 @app.post("/analyze")
 def analyze_data(req : analyzeRequest):
-    return{
-        "received_query": req.query,
-        "log_count": len(req.logs),
-        "summary": f"You sent {len(req.logs)} logs for analysis"
+    logs_text = "\n".join(req.logs)
+
+    # create a prompt 
+    prompt = f""" 
+        You are a backend system debugging assistant.
+
+        User Question: {req.query}
+
+        Logs : {logs_text}
+
+        Instructions :
+            - Identify possible reasons for the issue
+            - Focus on latency, errors, or patterns
+            - Give a short explanation
+    """
+
+    # For now, simulate reasoning (we'll plug real LLM next)
+
+    if "1200" in logs_text or "slow" in logs_text.lower():
+        analysis = "The system appears slow due to high latency in requests."
+    elif "timeout" in logs_text.lower():
+        analysis = "Timeout errors suggest backend or database delays."
+    else : 
+        analysis = "No obvious issue detected from logs."
+    
+    return {
+        "analysis": analysis,
+        "logs_analyzed": len(req.logs)
     }
+
