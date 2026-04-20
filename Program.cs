@@ -1,3 +1,5 @@
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -6,6 +8,10 @@ builder.Services.AddEndpointsApiExplorer(); // 👈 for Swagger
 builder.Services.AddSwaggerGen();           // 👈 for Swagger UI
 
 builder.Services.AddHttpClient();           // 👈 for calling Python service
+
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseNpgsql("Host=localhost;Database=logsdb;Username=postgres;Password=admin"));
+
 
 var app = builder.Build();
 

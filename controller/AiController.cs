@@ -16,14 +16,7 @@ namespace BackendAPI.Controllers
             _httpClient = httpClientFactory.CreateClient();
         }
 
-        [HttpGet("test")]
-        public async Task<IActionResult> TestPythonService()
-        {
-            var response = await _httpClient.GetAsync("http://localhost:8000/");
-            var content = await response.Content.ReadAsStringAsync();
-
-            return Ok(new { pythonResponse = content });
-        }
+        
         [HttpPost("analyze")]
         public async Task<IActionResult> Analyze()
         {
