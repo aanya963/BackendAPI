@@ -3,6 +3,7 @@ from pydantic import BaseModel # type: ignore
 
 app = FastAPI()
 
+# data model using pydantic. : Validates input automatically, Prevents wrong data, Very common in backend systems
 class analyzeRequest(BaseModel):
     query: str
     logs: list[str]
@@ -12,7 +13,7 @@ def read_root():
     return {"message": "Python service is running"}
 
 
-@app.get("/analyze")
+@app.post("/analyze")
 def analyze_data(req : analyzeRequest):
     return{
         "received_query": req.query,
