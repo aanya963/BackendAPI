@@ -3,6 +3,7 @@ import json
 from groq import Groq
 from dotenv import load_dotenv
 from tools import get_logs
+from cache import get_cache, set_cache
 
 load_dotenv()
 
@@ -36,6 +37,14 @@ You are a backend system debugging expert.
 """
 
 def run_agent(query: str):
+    
+    cache_key = f"ai:{query}"
+    # check cache
+    cached=get_cache(cache_key)
+    if cached:
+        return cached
+    
+
     # Step 1
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
@@ -80,6 +89,12 @@ def run_agent(query: str):
             ]
         )
 
-        return final_response.choices[0].message.content
+        answer = final_response.choices[0].message.content
 
+        # store in cache
+        set_cache(cache_key, answer)
+
+        return answer
+    
+    set_cache(cache_key, message.content)
     return message.content

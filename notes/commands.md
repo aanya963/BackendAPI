@@ -50,3 +50,11 @@ dotnet ef migrations add InitialCreate
     
 # Actually runs SQL → creates table
 dotnet ef database update
+
+
+# Install Redis
+    brew install redis
+    brew services start redis
+
+# Install Python Client
+    pip install redis
