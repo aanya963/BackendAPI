@@ -9,6 +9,7 @@ app = FastAPI()
 
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 # data model using pydantic. : Validates input automatically, Prevents wrong data, Very common in backend systems
+
 class analyzeRequest(BaseModel):
     query: str
     logs: list[str]

@@ -50,9 +50,8 @@ namespace BackendAPI.Controllers
                 requestData
             );
 
-            var content = await response.Content.ReadAsStringAsync();
-
-            return Ok(new {aiResponse = content});
+            var content = await response.Content.ReadFromJsonAsync<object>();
+            return Ok(content);
         }
     }
 }
