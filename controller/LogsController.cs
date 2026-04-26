@@ -13,16 +13,20 @@ public class LogsController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddLog(Log log)
+    public async Task<IActionResult> AddLog([FromBody] Log log)
     {
+        Console.WriteLine($"\n👉 [.NET] Received log: {log.Service} | {log.Message} | {log.Latency}");
+
         log.Timestamp = DateTime.UtcNow;
 
         _context.Logs.Add(log);
         await _context.SaveChangesAsync();
 
+        Console.WriteLine("👉 [.NET] Saved to DB");
+
         return Ok(log);
     }
-
+    
     [HttpGet]
     public IActionResult GetLogs()
     {
@@ -54,4 +58,12 @@ public class LogsController : ControllerBase
         return Ok(logs);
     }
 
+    [HttpDelete("all")]
+    public async Task<IActionResult> DeleteAllLogs()
+    {
+        _context.Logs.RemoveRange(_context.Logs);
+        await _context.SaveChangesAsync();
+
+        return Ok("All logs deleted");
+    }
 }
