@@ -8,6 +8,13 @@ redis_client = redis.Redis(
     decode_responses=True
 )
 
+def get_history(session_id: str):
+    return redis_client.lrange(session_id, 0, -1)
+
+def add_history(session_id: str, message: str):
+    redis_client.rpush(session_id, message)
+    redis_client.expire(session_id, 600)
+    
 def get_cache(key: str):
     return redis_client.get(key)
 

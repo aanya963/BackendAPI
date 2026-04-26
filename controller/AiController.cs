@@ -3,6 +3,7 @@ using System.Net.Http;
 using System.Threading.Tasks;
 using System.Net.Http.Json;
 using System.Security.Authentication.ExtendedProtection;
+using Microsoft.EntityFrameworkCore;
 
 namespace BackendAPI.Controllers
 {
@@ -52,6 +53,23 @@ namespace BackendAPI.Controllers
 
             var content = await response.Content.ReadFromJsonAsync<object>();
             return Ok(content);
+        }
+    
+        [HttpGet("slow")]
+        public async Task<IActionResult> GetSlowLogs()
+        {
+            // var slowLogs = await _context.Logs
+            //     .Where(l => l.Latency > 1000)
+            //     .OrderByDescending(l => l.Timestamp)
+            //     .Take(20)
+            //     .ToListAsync();
+            var slowLogs = await EntityFrameworkQueryableExtensions.ToListAsync(
+                _context.Logs
+                    .Where(l => l.Latency > 1000)
+                    .OrderByDescending(l => l.Timestamp)
+                    .Take(20)
+            );
+            return Ok(slowLogs);
         }
     }
 }

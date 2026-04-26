@@ -240,42 +240,25 @@
 
 # 🎨 **PHASE 5 — UI + Polish (Day 16–18)**
 
-    ## 🎯 Goal:
-
-    Make it presentable
-
-    ---
+    ## 🎯 Goal:Make it presentable
 
     ## 🛠️ Build:
-
-    Frontend (React or simple UI):
-
-    * input query
-    * show response
-    * show logs used
-
-    ---
+        Frontend (React or simple UI):
+            * input query
+            * show response
+            * show logs used
 
     ## 📚 Learn:
-
-    * Basic API integration in frontend
-
-    ---
+        * Basic API integration in frontend
 
     ## ✨ Add:
-
-    * Clean UI
-    * Simple dashboard
-
-    ---
+        * Clean UI
+        * Simple dashboard
 
     ## ✅ Outcome:
+        👉 Resume-ready project
 
-    👉 Resume-ready project
-
-    ---
-
-    # 📦 FINAL DELIVERABLE
+# 📦 FINAL DELIVERABLE
 
     You will have:
 

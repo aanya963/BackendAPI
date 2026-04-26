@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>AI Debug Agent</title>
+</head>
+<body>
+
+<h2>AI System Debugger</h2>
+
+<input id="query" placeholder="Why is auth slow?" />
+<button onclick="ask()">Ask</button>
+
+<h3>Answer:</h3>
+<pre id="response"></pre>
+
+<h3>Steps:</h3>
+<pre id="steps"></pre>
+
+<script>
+async function ask() {
+  const query = document.getElementById("query").value;
+
+  const res = await fetch("http://localhost:5124/api/ai/analyze?serviceName=auth", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      query: query,
+      logs: []
+    })
+  });
+
+  const data = await res.json();
+  console.log(data); // Check browser console (F12) to see the real structure
+    const result = data.data; // or data.result, data.response, etc.
+  document.getElementById("response").innerText = data.analysis;
+  document.getElementById("steps").innerText = JSON.stringify(data.steps, null, 2);
+  
+}
+</script>
+
+</body>
+</html>

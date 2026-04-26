@@ -13,5 +13,5 @@ client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 @app.post("/analyze")
 def analyze_data(req : AnalyzeRequest):
-   result = run_agent(req.query)
-   return {"analysis": result}
+    result = run_agent(req.query)
+    return {"analysis": result}

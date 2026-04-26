@@ -2,8 +2,8 @@ import os
 import json
 from groq import Groq
 from dotenv import load_dotenv
-from tools import get_logs
-from cache import get_cache, set_cache
+from tools import get_logs, get_slow_requests
+from cache import add_history, get_cache, get_history, set_cache
 
 load_dotenv()
 
@@ -23,54 +23,99 @@ tools = [
                 "required": ["service_name"]
             }
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "get_slow_requests",
+            "description": "Get slow requests with high latency",
+            "parameters": {
+                "type": "object",
+                "properties": {}
+            }
+        }
     }
 ]
 
 SYSTEM_PROMPT = """
-You are a backend system debugging expert.
+You are a backend debugging expert.
 
-- Be specific
-- Mention exact causes
-- Use logs carefully
-- Avoid generic answers
-- If logs are insufficient, say so clearly
+- Use get_logs for specific services
+- Use get_slow_requests when user asks about latency or slowness
+- Always choose the most relevant tool
+- Avoid guessing without data
 """
 
-def run_agent(query: str):
-    
-    cache_key = f"ai:{query}"
-    # check cache
-    cached=get_cache(cache_key)
-    if cached:
-        return cached
-    
 
-    # Step 1
+def run_agent(query: str, session_id: str = "default"):
+    steps = []
+
+    cache_key = f"ai:{query.lower().strip()}"
+
+    # 🧠 STEP 0: Check cache
+    cached = get_cache(cache_key)
+    if cached:
+        return {
+            "analysis": cached,
+            "steps": ["Returned from cache"]
+        }
+
+    # 🧠 STEP 1: Get conversation history
+    history = get_history(session_id)
+
+    messages = [
+        {"role": "system", "content": SYSTEM_PROMPT}
+    ]
+
+    for h in history:
+        messages.append({"role": "user", "content": h})
+
+    messages.append({"role": "user", "content": query})
+
+    # 🧠 STEP 2: First LLM call
     response = client.chat.completions.create(
         model="llama-3.1-8b-instant",
-        messages=[
-            {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": query}
-        ],
+        messages=messages,
         tools=tools,
         tool_choice="auto"
     )
 
     message = response.choices[0].message
 
-    # Step 2: tool call
+    # 🧠 STEP 3: Tool calling logic
     if message.tool_calls:
+
         tool_call = message.tool_calls[0]
-        args = json.loads(tool_call.function.arguments)
+        function_name = tool_call.function.name
 
-        logs = get_logs(args["service_name"])
+        steps.append(f"AI decided to call {function_name}")
 
+        import json
+        args = json.loads(tool_call.function.arguments or "{}")
+
+        # 🔹 TOOL 1: get_logs
+        if function_name == "get_logs":
+            logs = get_logs(args["service_name"])
+            steps.append(f"Fetched {len(logs)} logs")
+
+        # 🔹 TOOL 2: get_slow_requests
+        elif function_name == "get_slow_requests":
+            logs = get_slow_requests()
+            steps.append(f"Fetched {len(logs)} slow logs")
+
+        else:
+            logs = []
+            steps.append("Unknown tool called")
+
+        # 🧠 Convert logs to text
         logs_text = "\n".join([
             f"{log['service']}: {log['message']}, latency: {log['latency']}ms"
             for log in logs
         ])
 
-        # Step 3: final reasoning
+        steps.append("Analyzing logs using LLM")
+
+        # 🧠 STEP 4: Final LLM reasoning
         final_response = client.chat.completions.create(
             model="llama-3.1-8b-instant",
             messages=[
@@ -84,17 +129,31 @@ def run_agent(query: str):
                 {
                     "role": "tool",
                     "content": logs_text,
-                    "tool_call_id": message.tool_calls[0].id
+                    "tool_call_id": tool_call.id
                 }
             ]
         )
 
         answer = final_response.choices[0].message.content
 
-        # store in cache
+        # 🧠 Save history + cache
+        add_history(session_id, query)
         set_cache(cache_key, answer)
 
-        return answer
-    
-    set_cache(cache_key, message.content)
-    return message.content
+        return {
+            "analysis": answer,
+            "steps": steps
+        }
+
+    # 🧠 STEP 5: No tool used
+    steps.append("AI answered directly (no tool used)")
+
+    answer = message.content
+
+    add_history(session_id, query)
+    set_cache(cache_key, answer)
+
+    return {
+        "analysis": answer,
+        "steps": steps
+    }
