@@ -1,14 +1,19 @@
 import pika
 import json
 
-def publish_log(log):
-    # 🔌 Connect to RabbitMQ
+connection = None
+channel = None
+
+
+def init_rabbitmq():
+    global connection, channel
+
     connection = pika.BlockingConnection(
         pika.ConnectionParameters(host='localhost')
     )
+
     channel = connection.channel()
 
-    # 📦 Create queue (safe if already exists)
     channel.queue_declare(
         queue='logs_queue',
         durable=True,
@@ -18,20 +23,22 @@ def publish_log(log):
         }
     )
 
-    # also create DLQ
     channel.queue_declare(queue='dead_logs_queue', durable=True)
 
-    # 📤 Send message
+    print("🐰 RabbitMQ initialized")
+
+
+def publish_log(log):
+    if not channel:
+        raise Exception("RabbitMQ not initialized")
+
     channel.basic_publish(
         exchange='',
         routing_key='logs_queue',
         body=json.dumps(log),
         properties=pika.BasicProperties(
-            delivery_mode=2  # makes message persistent
+            delivery_mode=2
         )
     )
-    
 
     print("📤 [PRODUCER] Sent:", log)
-
-    connection.close()

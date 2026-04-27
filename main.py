@@ -8,7 +8,14 @@ from rabbitmq_producer import publish_log
 
 load_dotenv()
 app = FastAPI()
+from rabbitmq_producer import publish_log, init_rabbitmq
 
+@app.on_event("startup")
+def startup_event():
+    print("🚀 Starting app...")
+    init_rabbitmq()
+
+    
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 
@@ -21,9 +28,13 @@ def analyze_data(req : AnalyzeRequest):
 
 
 
+from fastapi import BackgroundTasks
+
 @app.post("/ingest-log")
-def ingest_log(log: dict):
+def ingest_log(log: dict, background_tasks: BackgroundTasks):
     print("\n👉 [API] Received log:", log)
-    publish_log(log)
-    print("👉 [API] Pushed to Redis queue")
+
+    background_tasks.add_task(publish_log, log)
+
     return {"status": "log added to queue"}
+
