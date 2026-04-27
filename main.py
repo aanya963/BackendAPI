@@ -4,6 +4,7 @@ import os
 from groq import Groq
 from dotenv import load_dotenv
 from models import AnalyzeRequest
+from rabbitmq_producer import publish_log
 
 load_dotenv()
 app = FastAPI()
@@ -19,15 +20,10 @@ def analyze_data(req : AnalyzeRequest):
     }
 
 
-# from queue_manager import log_queue
-from queue_manager import push_log
-
-import queue_manager
-print(queue_manager.__file__)
 
 @app.post("/ingest-log")
 def ingest_log(log: dict):
     print("\n👉 [API] Received log:", log)
-    push_log(log)
+    publish_log(log)
     print("👉 [API] Pushed to Redis queue")
     return {"status": "log added to queue"}

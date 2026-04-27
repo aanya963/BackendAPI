@@ -58,3 +58,9 @@ dotnet ef database update
 
 # Install Python Client
     pip install redis
+
+
+
+## LOAD TEST
+1. brew install k6
+2. Create load_test.js
