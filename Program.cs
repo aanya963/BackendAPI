@@ -41,5 +41,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers(); // 👈 IMPORTANT (maps your AiController)
-Console.WriteLine("Branch 500");
+Console.WriteLine("Branch 600");
 app.Run();
