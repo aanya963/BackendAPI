@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
 builder.Services.AddControllers();         
-builder.Services.AddEndpointsApiExplorer(); //endpint explored added
+builder.Services.AddEndpointsApiExplorer(); 
 builder.Services.AddSwaggerGen();          
 
 builder.Services.AddHttpClient();           
@@ -41,5 +41,5 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers(); // 👈 IMPORTANT (maps your AiController)
-
+Console.WriteLine("branch -2 ");
 app.Run();
