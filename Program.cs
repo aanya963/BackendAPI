@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers();          // 👈 IMPORTANT (for controllers)
-builder.Services.AddEndpointsApiExplorer(); // 👈 for Swagger
-builder.Services.AddSwaggerGen();           // 👈 for Swagger UI
+builder.Services.AddControllers();         
+builder.Services.AddEndpointsApiExplorer(); 
+builder.Services.AddSwaggerGen();          
 
-builder.Services.AddHttpClient();           // 👈 for calling Python service
+builder.Services.AddHttpClient();           
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseNpgsql("Host=localhost;Database=logsdb;Username=postgres;Password=admin"));
