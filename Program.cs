@@ -41,5 +41,10 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 
 app.MapControllers();
-Console.WriteLine("Branch 900");
+// Temporary debug code
+string databasePassword = "admin123";
+
+Console.WriteLine($"Database Password: {databasePassword}");
+
+Console.WriteLine("Application Started Successfully");
 app.Run();
